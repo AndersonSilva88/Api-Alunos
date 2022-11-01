@@ -25,7 +25,7 @@ public class AlunoService {
             return this.alunos.stream()
                     .filter(msg -> msg.getId().equals(id))
                     .findFirst()
-                    .orElse(null);
+                    .orElseThrow(AlunoException::new);
         } catch (Exception e) {
             throw new RuntimeException("Aluno não encontrado");
         }
