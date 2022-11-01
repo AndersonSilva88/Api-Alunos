@@ -4,14 +4,16 @@ package com.anderson.apialunos;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/alunos")
 public class AlunosController {
+
+    AlunoService alunoService = new AlunoService();
 
     private final List<Alunos> alunos;
 
@@ -21,48 +23,47 @@ public class AlunosController {
 
     @GetMapping("/{id}")
     public Alunos findById(@PathVariable("id") Integer id) {
-        return this.alunos.stream()
-                .filter(msg -> msg.getId().equals(id))
-                .findFirst()
-                .orElse(null);
+      try {
+          return alunoService.findById(id);
+      } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      }
     }
 
     @PostMapping
     public ResponseEntity<Integer> add(@RequestBody Alunos aluno) {
-        if (aluno.getId() == null) {
-            aluno.setId(alunos.size() + 1);
-        }
-
-        alunos.add(aluno);
-        return new ResponseEntity<>(aluno.getId(), HttpStatus.CREATED);
+      try {
+          return alunoService.add(aluno);
+      } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      }
     }
 
     @PutMapping
     public ResponseEntity update(@RequestBody Alunos aluno) {
-        alunos.stream()
-                .filter(msg -> msg.getId().equals(aluno.getId()))
-                .forEach(msg -> {
-                    msg.setNome(aluno.getNome());
-                    msg.setIdade(aluno.getIdade());
-                });
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+      try {
+          return alunoService.update(aluno);
+      } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Integer id) {
-        alunos.removeIf(msg -> msg.getId().equals(id));
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        try {
+            return alunoService.delete(id);
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping
     public List<Alunos> findAll(@RequestParam(required = false) String nome, Integer idade) {
-        if (nome != null) {
-            return alunos.stream()
-                    .filter(msg -> msg.getNome().contains(nome))
-                    .filter(msg -> msg.getIdade().equals(idade))
-                    .collect(Collectors.toList());
-        }
-        return alunos;
+       try {
+           return alunoService.findAll(nome,idade);
+       } catch (Exception e) {
+           throw  new ResponseStatusException(HttpStatus.NOT_FOUND);
+       }
     }
 
 
